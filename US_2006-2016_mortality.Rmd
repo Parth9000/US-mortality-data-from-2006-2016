@@ -1,0 +1,198 @@
+---
+title: "United States 2006 -2016 mortality "
+author: "Parth Parekh"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    source_code: embed
+    runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(highcharter)
+library(dplyr)
+library(viridisLite)
+library(treemap)
+library(flexdashboard)
+library(shiny)
+library(leaflet)
+library(ggplot2)
+library(plotly)
+
+
+thm <- 
+  hc_theme(
+    colors = c("#1a6ecc", "#434348", "#90ed7d"),
+    chart = list(
+      backgroundColor = "transparent",
+      style = list(fontFamily = "Source Sans Pro")
+    ),
+    xAxis = list(
+      gridLineWidth = 1
+    )
+  )
+
+```
+Column {.tabset data-width=500}
+-----------------------------------------------------------------------
+
+### Crude Number
+
+```{r}
+
+
+USA_mortality<-read.csv("C://Stevens//progrmas//WISQARS_areasHighConcentration_USmap_20180716-092710.csv")
+
+
+USA_mortality$crudeNumber<-as.numeric(gsub(",","",USA_mortality$crudeNumber))
+
+
+
+data("usgeojson")
+
+
+USA_mortality <- USA_mortality %>%
+  mutate(state = stateName)
+
+n <- 100
+colstops <- data.frame(
+  q = 0:n/n,
+  c = substring(viridis(n + 1), 0, 7)) %>%
+  list.parse2()
+
+highchart() %>%
+  hc_add_series_map(usgeojson, USA_mortality, name = "crudeNumber",
+                    value="crudeNumber", joinBy = c("woename","stateName"),
+                    dataLabels = list(enabled = TRUE,
+                                      format = '{point.properties.postalcode}')) %>%
+  hc_colorAxis(stops = colstops) %>%
+  hc_legend(valueDecimals = 0) %>%
+  hc_mapNavigation(enabled = TRUE) %>%
+  hc_add_theme(thm)
+
+```
+
+
+### Crude Rate
+```{r}
+USA_mortality <- USA_mortality %>%
+  mutate(state = stateName)
+
+n <- 100
+colstops <- data.frame(
+  q = 0:n/n,
+  c = substring(viridis(n + 1), 0, 7)) %>%
+  list.parse2()
+
+highchart() %>%
+  hc_add_series_map(usgeojson, USA_mortality, name = "crudeRate",
+                    value="crudeRate", joinBy = c("woename","stateName"),
+                    dataLabels = list(enabled = TRUE,
+                                      format = '{point.properties.postalcode}')) %>%
+  hc_colorAxis(stops = colstops) %>%
+  hc_legend(valueDecimals = 0) %>%
+  hc_mapNavigation(enabled = TRUE) %>%
+  hc_add_theme(thm)
+```
+
+### age Adjusted Rate
+
+```{r}
+
+USA_mortality <- USA_mortality %>%
+  mutate(state = stateName)
+
+n <- 100
+colstops <- data.frame(
+  q = 0:n/n,
+  c = substring(viridis(n + 1), 0, 7)) %>%
+  list.parse2()
+
+highchart() %>%
+  hc_add_series_map(usgeojson, USA_mortality, name = "ageAdjustedRate",
+                    value="ageAdjustedRate", joinBy = c("woename","stateName"),
+                    dataLabels = list(enabled = TRUE,
+                                      format = '{point.properties.postalcode}')) %>%
+  hc_colorAxis(stops = colstops) %>%
+  hc_legend(valueDecimals = 0) %>%
+  hc_mapNavigation(enabled = TRUE) %>%
+  hc_add_theme(thm)
+
+```
+
+Column { .tabset data-width=500}
+-----------------------------------------------------------------------
+### Cause of Death from 2006 to 2016 of USA
+
+```{r, fig.keep='none'}
+
+
+USA_causeofdeath<-read.csv("C://Stevens//progrmas//WISQARS_injuryCauseOfDeath_treemap_20180716-092645.csv")
+
+
+USA_causeofdeath$crudeNumber<-as.numeric(gsub(",","",USA_causeofdeath$crudeNumber))
+
+require(bubbles)
+
+bubbles(value = USA_causeofdeath$crudeNumber,
+        color = rainbow(length(USA_causeofdeath$crudeNumber), alpha=NULL)[sample(length(USA_causeofdeath$crudeNumber))],
+        label = USA_causeofdeath$mechName,
+        width=1600, height=1600)
+```
+
+
+
+
+### Age distribution based on crude numbers
+
+```{r}
+
+USA_distbyAge<-read.csv("C://Stevens//progrmas//WISQARS_distByAge_bar_20180716-092858.csv")
+
+
+USA_distbyAge$crudeNumber<-as.numeric(gsub(",","",USA_distbyAge$crudeNumber))
+
+p<-ggplot(USA_distbyAge, aes(x= agegrp, y=crudeNumber, color=agegrp)) +
+  geom_bar(stat="identity", fill="white") + coord_flip()
+
+ggplotly(p) 
+
+
+
+
+
+```
+
+
+### Age distribution based on crude rate
+
+```{r}
+
+
+p<-ggplot(USA_distbyAge, aes(x= agegrp, y=crudeRate, color=agegrp)) +
+  geom_bar(stat="identity", fill="white") + coord_flip()
+
+ggplotly(p) 
+
+
+
+
+
+```
+
+### Age distribution based on age Adjusted Rate
+
+```{r}
+
+
+p<-ggplot(USA_distbyAge, aes(x= agegrp, y=crudeRate, color=agegrp)) +
+  geom_bar(stat="identity", fill="white") + coord_flip()
+
+ggplotly(p) 
+
+
+
+
+
+```
