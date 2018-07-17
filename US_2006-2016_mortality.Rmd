@@ -165,28 +165,13 @@ ggplotly(p)
 ```
 
 
-### Age distribution based on crude rate
-
-```{r}
-
-
-p<-ggplot(USA_distbyAge, aes(x= agegrp, y=crudeRate, color=agegrp)) +
-  geom_bar(stat="identity", fill="white") + coord_flip()
-
-ggplotly(p) 
-
-
-
-
-
-```
 
 ### Age distribution based on age Adjusted Rate
 
 ```{r}
 
 
-p<-ggplot(USA_distbyAge, aes(x= agegrp, y=crudeRate, color=agegrp)) +
+p<-ggplot(USA_distbyAge, aes(x= agegrp, y=ageAdjustedRate, color=agegrp)) +
   geom_bar(stat="identity", fill="white") + coord_flip()
 
 ggplotly(p) 
